@@ -68,7 +68,7 @@ public class gameMovement : MonoBehaviour
             transform.position = pos;
         }
     }
-    private void OnCollisionEnte(Collision col){
+    private void OnCollisionEnter(Collision col){
         if (col.gameObject.name.StartsWith("MyCar"))
         {
             print("Collision Detected!");
