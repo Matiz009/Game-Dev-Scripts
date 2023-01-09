@@ -1,9 +1,10 @@
 using System.Collections;
 using System.Collections.Generic;
+using UnityEngine.SceneManagement;
 using UnityEngine;
 using UnityEngine.UI;
 
-public class playerMovement : MonoBehaviour
+public class autumnLevelMovement : MonoBehaviour
 {
     Animator anim;
     public CharacterController2D controller;
@@ -15,13 +16,22 @@ public class playerMovement : MonoBehaviour
     float righthorizontalMove = 40f;
 
     float speed = 0.05f;
-
     bool jump = false;
     bool crouch = false;
 
+
     public Text ScoreText;
     public Text HealthText;
-
+    public GameObject Coin;
+    public GameObject enemy;
+    public GameObject endCheck;
+    public GameObject lastCheck;
+    [SerializeField] private AudioSource jumpSound;
+    [SerializeField] private AudioSource EnemySound;
+    [SerializeField] private AudioSource SpikeSound;
+    [SerializeField] private AudioSource CherrySound;
+    [SerializeField] private AudioSource FinSound;
+    [SerializeField] private AudioSource CoinSound;
     public static float score = 0;
     public static float health = 50;
 
@@ -30,6 +40,7 @@ public class playerMovement : MonoBehaviour
     // Start is called before the first frame update
     void Start()
     {
+ 
         anim = GetComponent<Animator>();
         HealthText.text = "Health: " + health.ToString();
         ScoreText.text = "Score: " + score.ToString();
@@ -72,6 +83,7 @@ public class playerMovement : MonoBehaviour
             {
                 controller.Move(lefthorizontalMove * Time.fixedDeltaTime, crouch, jump);
                 anim.SetBool("isWalk", true);
+                jumpSound.Play();
             }
 
             if (touch.position.x > Screen.width / 2 && touch.position.y > Screen.height/8) 
@@ -79,6 +91,7 @@ public class playerMovement : MonoBehaviour
                
                 controller.Move(righthorizontalMove * Time.fixedDeltaTime, crouch, jump);
                 anim.SetBool("isWalk", true);
+                jumpSound.Play();
             }
 
         }
@@ -91,47 +104,78 @@ public class playerMovement : MonoBehaviour
 
     private void OnCollisionEnter2D(Collision2D collision)
     {
-        if(collision.gameObject.name.StartsWith("cloud"))
+        
+
+
+        if (collision.gameObject.name.StartsWith("cherry"))
         {
-            transform.gameObject.transform.parent = cloud.transform;
-        }
-
-        if (!collision.gameObject.name.StartsWith("cloud"))
-        {
-            transform.gameObject.transform.parent = null;
-        }
-
-        if (collision.gameObject.name.StartsWith("cloud1"))
-        {
-            transform.gameObject.transform.parent = cloud1.transform;
-        }
-
-        if (collision.gameObject.name.StartsWith("cloud2"))
-        {
-            transform.gameObject.transform.parent = cloud2.transform;
-        }
-
-
-
-        if (collision.gameObject.name.StartsWith("Apple"))
-        {
-            score += 10;
-            ScoreText.text = "Score: " + score.ToString();
+            health += 10;
+            HealthText.text = "Health: " + health.ToString();
             Destroy(collision.gameObject);
+            CherrySound.Play();
+           
+        }
+        if (collision.gameObject.name.StartsWith("Coin"))
+        {
+            CoinSound.Play();
+            score += 10;
+            Destroy(collision.gameObject);
+            ScoreText.text = "Score: " + score.ToString();
            
         }
 
-
-        if (collision.gameObject.name.StartsWith("Saw"))
+        if (collision.gameObject.name.StartsWith("saw"))
         {
+            SpikeSound.Play();
             health -= 10;
             HealthText.text = "Health: " + health.ToString();
            if(health == 0)
             {
+                HealthText.gameObject.SetActive(false);
                 anim.SetTrigger("TriggerDead");
+                PlayerPrefs.SetFloat("Player Score", score);
+                SceneManager.LoadScene("GameOver");
             }
         }
+
+        if (collision.gameObject.name.StartsWith("Spike"))
+        {
+            SpikeSound.Play();
+            health -= 10;
+            HealthText.text = "Health: " + health.ToString();
+           if(health == 0)
+            {
+                HealthText.gameObject.SetActive(false);
+                anim.SetTrigger("TriggerDead");
+                PlayerPrefs.SetFloat("Player Score", score);
+                SceneManager.LoadScene("GameOver");
+            }
+        }
+        if (collision.gameObject.name.StartsWith("enemy"))
+        { 
+            EnemySound.Play();
+            health = 0;
+            HealthText.text = "Health: " + health.ToString();
+           if(health == 0)
+            {
+
+                HealthText.gameObject.SetActive(false);
+                anim.SetTrigger("TriggerDead");
+                PlayerPrefs.SetFloat("Player Score", score);
+                SceneManager.LoadScene("GameOver");
+            }
+        }
+        if (collision.gameObject.name.StartsWith("endCheck"))
+        {
+            FinSound.Play();
+            PlayerPrefs.SetFloat("Player Score", score);
+            SceneManager.LoadScene("WinterLevel");
+        }
+        if (collision.gameObject.name.StartsWith("lastCheck"))
+        {
+            PlayerPrefs.SetFloat("Player Score", score);
+            SceneManager.LoadScene("GameOver");
+        }
     }
-
-
+   
 }
